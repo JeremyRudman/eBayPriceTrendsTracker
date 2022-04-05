@@ -1,7 +1,8 @@
 import React from 'react';
-import './SearchBar.css';
+import { withRouter } from './withRouter'
+import './SearchPage.css';
 
-class SearchBar extends React.Component {
+class SearchPage extends React.Component {
 
     constructor(props) {
         super(props);
@@ -20,7 +21,10 @@ class SearchBar extends React.Component {
     handleSearchBarSubmit(event) {
         event.preventDefault();
         console.log(this.state.searchEntry);
+        console.log(this.props.navigate);
+        this.props.navigate(`/product/${this.state.searchEntry}`)
     }
+
     render() {
         return (
             <div className='main_body'>
@@ -29,14 +33,14 @@ class SearchBar extends React.Component {
                 </div>
                 <div className="search_bar_wrapper">
                     <form onSubmit={this.handleSearchBarSubmit}>
-                        <input type="text" className='search_bar' 
-                        onChange={this.handleSearchBarChange}
-                        placeholder="Enter product name here"/>
-                    </form>
+                            <input type="text" className='search_bar' 
+                            onChange={this.handleSearchBarChange}
+                            placeholder="Enter product name here"/>
+                    </form>  
                 </div>
             </div>
         )
     }
 }
 
-export default SearchBar;
+export default withRouter(SearchPage);
