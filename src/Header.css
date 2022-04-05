@@ -1,0 +1,15 @@
+.header_body{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 1.5em;
+    background-color: #d6d6d6;
+    height: 5vh;
+    box-shadow: 0 1px 5px darkgray;
+}
+
+.header_text{
+    margin-left: 10px;
+    margin-left: 20px 0;
+    color: #2b2b2b;
+}
