@@ -16,6 +16,7 @@
 .product_name{
     font-size: 1.75em;
     font-weight: 300;
+    margin: 1em 0
 }
 
 .loading_wrapper{
