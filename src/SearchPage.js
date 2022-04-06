@@ -1,5 +1,5 @@
 import React from 'react';
-import { withRouter } from './withRouter'
+import { withRouter } from './hooks/withRouter'
 import './SearchPage.css';
 
 class SearchPage extends React.Component {
@@ -22,7 +22,10 @@ class SearchPage extends React.Component {
         event.preventDefault();
         console.log(this.state.searchEntry);
         console.log(this.props.navigate);
-        this.props.navigate(`/product/${this.state.searchEntry}`)
+        //the lack of condition is to handle null or empty string
+        if(this.state.searchEntry) {
+            this.props.navigate(`/product/${this.state.searchEntry}`)
+        }
     }
 
     render() {

@@ -1,7 +1,9 @@
 import React from 'react';
 import './ProductInfo.css';
-import { withParams } from './withParams'
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { withParams } from './hooks/withParams'
+import { ComposedChart, ResponsiveContainer, Area, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { css } from "@emotion/react";
+import ClipLoader from "react-spinners/ClipLoader";
 
 
 
@@ -11,7 +13,8 @@ class ProductInfo extends React.Component {
         super(props);
 
         this.state = {
-            pricingData: []
+            pricingData: [],
+            loading: true,
         }
     }
 
@@ -27,11 +30,23 @@ class ProductInfo extends React.Component {
         const data = await response.json();
         if(!response.ok){
             console.log("Error: " + data.errors);
+        } else {
+            let filteredList = []
+            console.log(data)
+            if(data.total !== 0){
+                filteredList = this.getProductPriceAndDate(data.itemSummaries);
+            }
+            this.setState({pricingData: filteredList, loading: false})
         }
-        console.log(data)
-        const filteredList = this.getProductPriceAndDate(data.itemSummaries);
-        console.log(filteredList);
-        this.setState({pricingData: filteredList})
+    }
+
+    convertUTCDateToDateString(dateUTC) {
+        let date = new Date(dateUTC);
+        let month = date.getMonth() + 1; // month is indexed on zero indexed
+        let day = date.getDate(); // day is indexed on one indexed
+        let year = date.getFullYear();
+        let dateString = `${year}/${month}/${day}`;
+        return dateString
     }
 
     getProductPriceAndDate(productList) {
@@ -49,15 +64,14 @@ class ProductInfo extends React.Component {
             }
         })
 
-        lastDate = productList[0]?.itemCreationDate;
+        lastDate = this.convertUTCDateToDateString(productList[0]?.itemCreationDate);
         for (let index = 0; index < productList.length; index++) {
             let product = productList[index];
              // currency conversion to be done in later version
              if(product.price.currency === "USD"){
-                
-                if(lastDate !== product.itemCreationDate || index === (productList.length - 1)){
+                if(lastDate !== this.convertUTCDateToDateString(product.itemCreationDate) || index === (productList.length - 1)){
                     if(index === (productList.length - 1)) {
-                        lastDate = product.itemCreationDate;
+                        lastDate = this.convertUTCDateToDateString(product.itemCreationDate);
                         let tempPrice = parseFloat(product.price.value)
                         daysPrices.push(tempPrice)
                         if(tempPrice > maxPrice || maxPrice === -1){
@@ -67,22 +81,15 @@ class ProductInfo extends React.Component {
                             minPrice = tempPrice;
                         }
                     }
-                    let tempSum = 0;
-                    daysPrices.forEach(price => {
-                        tempSum += price;
-                    });
-                    let averagePrice = tempSum / daysPrices.length;
-                    let date = new Date(lastDate);
-                    let month = date.getMonth() + 1; // month is indexed on zero indexed
-                    let day = date.getDate(); // day is indexed on one indexed
-                    let year = date.getFullYear();
-                    let dateString = `${year}/${month}/${day}`;
-                    graphData.push({price: averagePrice, posted_date: dateString, maxPrice: maxPrice, minPrice: minPrice});
+                    daysPrices.sort((a,b) => {return a - b;});
+                    let price;
+                    price = daysPrices[Math.floor(daysPrices.length/2)];
+                    graphData.push({price: price, posted_date: lastDate, priceRange: [minPrice, maxPrice]});
                     maxPrice = -1;
                     minPrice = -1;
-                    daysPrices = []
+                    daysPrices = [];
                 } 
-                lastDate = product.itemCreationDate;
+                lastDate = this.convertUTCDateToDateString(product.itemCreationDate)
                 let tempPrice = parseFloat(product.price.value)
                 daysPrices.push(tempPrice)
                 if(tempPrice > maxPrice || maxPrice === -1){
@@ -98,20 +105,34 @@ class ProductInfo extends React.Component {
     }
 
     render() {
-        if(this.state.pricingData.length === 0){
+        const {name} = this.props.params
+        if(this.state.loading){
             return(
-                <div>Loading</div>
+                <div className='product_body'>
+                    <span className='product_name'>Product: {name}</span>
+                    <div className='product_graph'>
+                        <div className='loading_wrapper'>
+                            <ClipLoader size={150} color={"#a1a1a1"} loading={this.state.loading}/>
+                        </div>
+                    </div>
+                </div>
             )
         } else {
             return (
                 <div className='product_body'>
-                    <LineChart width={800} height={800} data={this.state.pricingData}>
-                        <Line type="monotone" dataKey="price" stroke="#8884d8" />
-                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                        <XAxis dataKey="posted_date" />
-                        <YAxis />
-                        <Tooltip />
-                    </LineChart>
+                    <span className='product_name'>Product: {name}</span>
+                    <div className='product_graph'>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart  className='product_graph' margin={{ top: 10, left: 10, right: 20, bottom: 10 }} data={this.state.pricingData}>
+                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                <XAxis dataKey="posted_date" />
+                                <YAxis domain={[0,100]}/>
+                                <Line type="monotone" dataKey="price" stroke="#8884d8" />
+                                <Area dataKey="priceRange" stroke="#8884d8" fill="#8884d8" />
+                                <Tooltip />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
             )
         }
