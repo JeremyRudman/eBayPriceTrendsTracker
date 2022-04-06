@@ -2,7 +2,6 @@ import React from 'react';
 import './ProductInfo.css';
 import { withParams } from './hooks/withParams'
 import { ComposedChart, ResponsiveContainer, Area, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
-import { css } from "@emotion/react";
 import ClipLoader from "react-spinners/ClipLoader";
 
 
@@ -128,7 +127,7 @@ class ProductInfo extends React.Component {
                                 <XAxis dataKey="posted_date" />
                                 <YAxis domain={[0,100]}/>
                                 <Line type="monotone" dataKey="price" stroke="#8884d8" />
-                                <Area dataKey="priceRange" stroke="#8884d8" fill="#8884d8" />
+                                <Area type="monotone" dataKey="priceRange" stroke="#8884d8" fill="#b8b4fa" />
                                 <Tooltip />
                             </ComposedChart>
                         </ResponsiveContainer>
