@@ -32,7 +32,7 @@ class SearchPage extends React.Component {
         return (
             <div className='main_body'>
                 <div className='title_wrapper'>
-                    <span className='title_text'>eBay Item Price Tracker</span>
+                    <span className='title_text'>eBay Price Tracker</span>
                 </div>
                 <div className="search_bar_wrapper">
                     <form onSubmit={this.handleSearchBarSubmit}>
